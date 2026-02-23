@@ -1,6 +1,11 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { config } from './env.js';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // TypeORM DataSource configuration
 export const AppDataSource = new DataSource({
@@ -14,13 +19,13 @@ export const AppDataSource = new DataSource({
   logging: config.env === 'development',
   entities: [
     config.env === 'production'
-      ? 'dist/entities/**/*.js'
-      : 'src/entities/**/*.ts'
+      ? join(__dirname, '..', 'entities', '**', '*.js')
+      : join(__dirname, '..', 'entities', '**', '*.ts')
   ],
   migrations: [
     config.env === 'production'
-      ? 'dist/database/migrations/**/*.js'
-      : 'src/database/migrations/**/*.ts'
+      ? join(__dirname, '..', 'database', 'migrations', '**', '*.js')
+      : join(__dirname, '..', 'database', 'migrations', '**', '*.ts')
   ],
   subscribers: [],
 });
