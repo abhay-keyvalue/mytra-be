@@ -7,12 +7,15 @@ A robust and scalable Order Management System (OMS) backend built with Node.js, 
 - **TypeScript**: Full type safety and modern JavaScript features
 - **Express.js**: Fast, unopinionated web framework for Node.js
 - **PostgreSQL**: Robust relational database for data persistence
+- **TypeORM**: Type-safe ORM with decorator-based entities
 - **JWT Authentication**: Secure user authentication and authorization
+- **bcrypt**: Secure password hashing with salt rounds
 - **Docker Support**: Containerized application with Docker and Docker Compose
 - **Modular Architecture**: Clean, maintainable, and scalable code structure
 - **Environment Configuration**: Flexible configuration using environment variables
 - **Error Handling**: Centralized error handling middleware
 - **Request Logging**: Custom logging middleware for API requests
+- **Input Validation**: Express-validator for request validation
 - **Health Check**: Built-in health check endpoint for monitoring
 
 ## 📋 Prerequisites
@@ -30,18 +33,36 @@ Before you begin, ensure you have the following installed:
 myntra-be/
 ├── src/
 │   ├── config/              # Configuration files
-│   │   ├── database.ts      # Database configuration
+│   │   ├── typeorm.ts       # TypeORM DataSource configuration
 │   │   └── env.ts           # Environment variables configuration
+│   ├── entities/            # TypeORM entities
+│   │   ├── User.ts          # User entity
+│   │   ├── Product.ts       # Product entity
+│   │   ├── Order.ts         # Order entity
+│   │   └── OrderItem.ts     # OrderItem entity
+│   ├── services/            # Business logic layer
+│   │   └── auth.service.ts  # Authentication service
+│   ├── controllers/         # Request handlers
+│   │   └── auth.controller.ts # Authentication controller
 │   ├── middlewares/         # Express middlewares
 │   │   ├── logger.middleware.ts
-│   │   └── error.middleware.ts
+│   │   ├── error.middleware.ts
+│   │   └── auth.middleware.ts # JWT authentication middleware
 │   ├── routes/              # API routes
 │   │   ├── index.ts         # Main router
-│   │   └── health.routes.ts # Health check routes
+│   │   ├── health.routes.ts # Health check routes
+│   │   └── auth.routes.ts   # Authentication routes
+│   ├── utils/               # Utility functions
+│   │   └── auth.utils.ts    # Password hashing, JWT utils
+│   ├── validators/          # Request validators
+│   │   └── auth.validator.ts # Authentication validators
+│   ├── types/               # TypeScript type definitions
+│   │   └── index.ts         # Shared types
+│   ├── database/            # Database scripts
+│   │   └── seed.ts          # Database seed script
 │   └── app.ts               # Application entry point
 ├── dist/                    # Compiled JavaScript (generated)
 ├── .env                     # Environment variables (create from .env.example)
-├── .env.example             # Example environment variables
 ├── .gitignore               # Git ignore file
 ├── .dockerignore            # Docker ignore file
 ├── Dockerfile               # Docker configuration
@@ -77,12 +98,17 @@ myntra-be/
    # Create database: myntra_oms_db
    ```
 
-5. **Run development server**
+5. **Seed the database**
+   ```bash
+   npm run seed
+   ```
+
+6. **Run development server**
    ```bash
    npm run dev
    ```
 
-6. **Build for production**
+7. **Build for production**
    ```bash
    npm run build
    npm start
@@ -116,6 +142,10 @@ myntra-be/
 - `npm run dev:watch` - Start development server with file watching
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm start` - Run the compiled production build
+- `npm run seed` - Seed database with sample data
+- `npm run migration:generate -- -n MigrationName` - Generate new migration
+- `npm run migration:run` - Run pending migrations
+- `npm run migration:revert` - Revert last migration
 - `npm test` - Run tests (to be implemented)
 
 ## 🌐 API Endpoints
@@ -135,12 +165,96 @@ myntra-be/
 ### API Base URL
 - **Base URL**: `http://localhost:3000/api/v1`
 
+### Authentication APIs ✅
+
+#### Register User
+- **POST** `/api/v1/auth/register`
+- **Body:**
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "SecurePass123!",
+    "firstName": "John",
+    "lastName": "Doe",
+    "phone": "+919876543210"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "message": "User registered successfully",
+    "data": {
+      "user": {
+        "id": "uuid",
+        "email": "user@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "role": "CUSTOMER"
+      },
+      "token": "jwt-token"
+    }
+  }
+  ```
+
+#### Login User
+- **POST** `/api/v1/auth/login`
+- **Body:**
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "SecurePass123!"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "message": "Login successful",
+    "data": {
+      "user": {
+        "id": "uuid",
+        "email": "user@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "role": "CUSTOMER"
+      },
+      "token": "jwt-token"
+    }
+  }
+  ```
+
+#### Get User Profile (Protected)
+- **GET** `/api/v1/auth/profile`
+- **Headers:** `Authorization: Bearer <jwt-token>`
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "uuid",
+      "email": "user@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "phone": "+919876543210",
+      "role": "CUSTOMER",
+      "isActive": true,
+      "createdAt": "2026-01-22T12:00:00.000Z"
+    }
+  }
+  ```
+
+### Test Credentials
+
+**Admin:**
+- Email: `admin@myntra.com`
+- Password: `admin123`
+
+**Customer:**
+- Email: `customer@example.com`
+- Password: `customer123`
+
 ### Future Endpoints (Coming Soon)
-- **Authentication**
-  - `POST /api/v1/auth/register` - Register new user
-  - `POST /api/v1/auth/login` - User login
-  - `POST /api/v1/auth/logout` - User logout
-  - `GET /api/v1/auth/profile` - Get user profile
 
 - **Products** (Public)
   - `GET /api/v1/products` - List all products
@@ -206,13 +320,16 @@ The `docker-compose.yml` includes the following services:
 
 The application follows a modular architecture with clear separation of concerns:
 
-- **Config**: Centralized configuration management
-- **Middlewares**: Reusable middleware functions
-- **Routes**: API endpoint definitions
-- **Controllers**: Business logic (to be added)
-- **Models**: Data models and database schemas (to be added)
-- **Services**: Business logic layer (to be added)
-- **Utils**: Helper functions and utilities (to be added)
+- **Config**: Centralized configuration management (TypeORM DataSource, environment)
+- **Entities**: TypeORM entity definitions (User, Product, Order, OrderItem)
+- **Services**: Business logic layer (authentication, data operations)
+- **Controllers**: Request handlers (authentication)
+- **Middlewares**: Reusable middleware functions (logging, error handling, auth)
+- **Routes**: API endpoint definitions (health, auth)
+- **Validators**: Input validation schemas (express-validator)
+- **Utils**: Helper functions and utilities (password hashing, JWT)
+- **Types**: TypeScript type definitions
+- **Database**: Database scripts (seed data)
 
 ### Technology Stack
 
@@ -220,19 +337,64 @@ The application follows a modular architecture with clear separation of concerns
 - **Framework**: Express.js 4.x
 - **Language**: TypeScript 5.x
 - **Database**: PostgreSQL 15
+- **ORM**: TypeORM 0.3.x
 - **Authentication**: JWT (JSON Web Tokens)
 - **Security**: Helmet, CORS
 - **Validation**: Express Validator
-- **Password Hashing**: bcryptjs
+- **Password Hashing**: bcryptjs (12 rounds)
+
+## 🗄️ Database & ORM
+
+### TypeORM
+
+This project uses **TypeORM** as the Object-Relational Mapper (ORM) for database operations.
+
+**Key Features:**
+- Decorator-based entity definitions
+- Type-safe database queries
+- Automatic schema synchronization (development)
+- Migration system for production
+- Repository pattern for data access
+- Support for relations and transactions
+
+**Database Schema:**
+- **Users** - User authentication and profiles
+- **Products** - Product catalog
+- **Orders** - Order headers
+- **OrderItems** - Order line items (junction table)
+
+**Enums:**
+- `UserRole`: CUSTOMER, ADMIN
+- `OrderStatus`: PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+- `PaymentStatus`: PENDING, PAID, FAILED, REFUNDED
+
+**Commands:**
+```bash
+# Seed database with sample data
+npm run seed
+
+# Generate migration from entity changes
+npm run migration:generate -- -n MigrationName
+
+# Run pending migrations
+npm run migration:run
+
+# Revert last migration
+npm run migration:revert
+```
+
+For more details, see [TYPEORM-MIGRATION-GUIDE.md](./TYPEORM-MIGRATION-GUIDE.md)
 
 ## 🔒 Security Features
 
 - Helmet.js for security headers
 - CORS configuration
-- JWT-based authentication
-- Password hashing with bcrypt
+- JWT-based authentication (configurable expiration)
+- Password hashing with bcrypt (12 salt rounds)
 - Environment variable protection
-- Input validation and sanitization
+- Input validation and sanitization (express-validator)
+- SQL injection protection (TypeORM parameterized queries)
+- Protected routes with JWT middleware
 
 ## 📊 Database
 

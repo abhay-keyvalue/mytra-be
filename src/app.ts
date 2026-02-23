@@ -1,8 +1,9 @@
+import 'reflect-metadata';
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config/env.js';
-import { testDbConnection } from './config/database.js';
+import { initializeDatabase, closeDatabase } from './config/typeorm.js';
 import { loggerMiddleware } from './middlewares/logger.middleware.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import routes from './routes/index.js';
@@ -50,8 +51,8 @@ app.use(errorHandler);
 // Start server
 const startServer = async (): Promise<void> => {
   try {
-    // Test database connection
-    const dbConnected = await testDbConnection();
+    // Initialize TypeORM database connection
+    const dbConnected = await initializeDatabase();
     if (!dbConnected) {
       console.warn('⚠️  Server starting without database connection');
     }
@@ -76,7 +77,13 @@ const startServer = async (): Promise<void> => {
 process.on('unhandledRejection', (err: Error) => {
   console.error('UNHANDLED REJECTION! 💥 Shutting down...');
   console.error(err.name, err.message);
-  process.exit(1);
+  closeDatabase().then(() => process.exit(1));
+});
+
+// Handle SIGTERM
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  closeDatabase().then(() => process.exit(0));
 });
 
 // Start the server
