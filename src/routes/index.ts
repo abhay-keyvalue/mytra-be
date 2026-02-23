@@ -4,6 +4,7 @@ import authRoutes from './auth.routes.js';
 import productRoutes from './product.routes.js';
 import orderRoutes from './order.routes.js';
 import seedRoutes from './seed.routes.js';
+import adminUtilsRoutes from './admin-utils.routes.js';
 
 const router = Router();
 
@@ -21,5 +22,8 @@ router.use('/orders', orderRoutes);
 
 // Seed route (one-time setup, no shell access needed)
 router.use('/seed', seedRoutes);
+
+// Admin utilities (for initial setup)
+router.use('/admin-utils', adminUtilsRoutes);
 
 export default router;
