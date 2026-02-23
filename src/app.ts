@@ -14,9 +14,13 @@ const app: Application = express();
 // Security middleware
 app.use(helmet());
 
-// CORS configuration
+// CORS configuration - support multiple origins
+const corsOrigins = config.cors.origin.includes(',') 
+  ? config.cors.origin.split(',').map(origin => origin.trim())
+  : config.cors.origin;
+
 app.use(cors({
-  origin: config.cors.origin,
+  origin: corsOrigins,
   credentials: true,
 }));
 
