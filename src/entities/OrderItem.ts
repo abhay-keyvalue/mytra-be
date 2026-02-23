@@ -6,9 +6,8 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Relation,
 } from 'typeorm';
-import { Order } from './Order.js';
-import { Product } from './Product.js';
 
 @Entity('order_items')
 export class OrderItem {
@@ -37,13 +36,13 @@ export class OrderItem {
   updatedAt: Date;
 
   // Relations
-  @ManyToOne(() => Order, (order) => order.orderItems, { onDelete: 'CASCADE' })
+  @ManyToOne('Order', (order: any) => order.orderItems, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
-  order: Order;
+  order: Relation<any>;
 
-  @ManyToOne(() => Product, (product) => product.orderItems, {
+  @ManyToOne('Product', (product: any) => product.orderItems, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'product_id' })
-  product: Product;
+  product: Relation<any>;
 }

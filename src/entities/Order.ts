@@ -7,9 +7,8 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  Relation,
 } from 'typeorm';
-import { User } from './User.js';
-import { OrderItem } from './OrderItem.js';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -72,10 +71,10 @@ export class Order {
   updatedAt: Date;
 
   // Relations
-  @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
+  @ManyToOne('User', (user: any) => user.orders, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: Relation<any>;
 
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
-  orderItems: OrderItem[];
+  @OneToMany('OrderItem', (orderItem: any) => orderItem.order)
+  orderItems: Relation<any[]>;
 }

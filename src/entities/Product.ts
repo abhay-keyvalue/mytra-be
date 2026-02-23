@@ -5,8 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Relation,
 } from 'typeorm';
-import { OrderItem } from './OrderItem.js';
 
 @Entity('products')
 export class Product {
@@ -44,6 +44,6 @@ export class Product {
   updatedAt: Date;
 
   // Relations
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
-  orderItems: OrderItem[];
+  @OneToMany('OrderItem', (orderItem: any) => orderItem.product)
+  orderItems: Relation<any[]>;
 }

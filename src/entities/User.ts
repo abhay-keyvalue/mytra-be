@@ -5,8 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Relation,
 } from 'typeorm';
-import { Order } from './Order.js';
 
 export enum UserRole {
   CUSTOMER = 'CUSTOMER',
@@ -50,6 +50,6 @@ export class User {
   updatedAt: Date;
 
   // Relations
-  @OneToMany(() => Order, (order) => order.user)
-  orders: Order[];
+  @OneToMany('Order', (order: any) => order.user)
+  orders: Relation<any[]>;
 }

@@ -1,10 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { config } from './env.js';
-import { User } from '../entities/User.js';
-import { Product } from '../entities/Product.js';
-import { Order } from '../entities/Order.js';
-import { OrderItem } from '../entities/OrderItem.js';
 
 // TypeORM DataSource configuration
 export const AppDataSource = new DataSource({
@@ -14,10 +10,18 @@ export const AppDataSource = new DataSource({
   username: config.db.user,
   password: config.db.password,
   database: config.db.name,
-  synchronize: config.env === 'development', // Auto-sync schema in development
+  synchronize: config.env === 'development',
   logging: config.env === 'development',
-  entities: [User, Product, Order, OrderItem],
-  migrations: ['src/database/migrations/**/*.ts'],
+  entities: [
+    config.env === 'production'
+      ? 'dist/entities/**/*.js'
+      : 'src/entities/**/*.ts'
+  ],
+  migrations: [
+    config.env === 'production'
+      ? 'dist/database/migrations/**/*.js'
+      : 'src/database/migrations/**/*.ts'
+  ],
   subscribers: [],
 });
 
