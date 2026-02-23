@@ -3,6 +3,7 @@ import healthRoutes from './health.routes.js';
 import authRoutes from './auth.routes.js';
 import productRoutes from './product.routes.js';
 import orderRoutes from './order.routes.js';
+import seedRoutes from './seed.routes.js';
 
 const router = Router();
 
@@ -17,5 +18,8 @@ router.use('/products', productRoutes);
 
 // Order routes
 router.use('/orders', orderRoutes);
+
+// Seed route (one-time setup, no shell access needed)
+router.use('/seed', seedRoutes);
 
 export default router;

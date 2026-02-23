@@ -3,7 +3,7 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config/env.js';
-import { initializeDatabase, closeDatabase } from './config/typeorm.js';
+import { initializeDatabase, closeDatabase, AppDataSource } from './config/typeorm.js';
 import { loggerMiddleware } from './middlewares/logger.middleware.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import routes from './routes/index.js';
@@ -59,6 +59,21 @@ const startServer = async (): Promise<void> => {
     const dbConnected = await initializeDatabase();
     if (!dbConnected) {
       console.warn('⚠️  Server starting without database connection');
+    } else {
+      // Run migrations automatically in production
+      if (config.env === 'production') {
+        console.log('🔄 Running database migrations...');
+        try {
+          const migrations = await AppDataSource.runMigrations();
+          if (migrations.length > 0) {
+            console.log(`✅ Executed ${migrations.length} migration(s)`);
+          } else {
+            console.log('✅ Database schema is up to date');
+          }
+        } catch (migrationError) {
+          console.error('❌ Migration failed:', migrationError);
+        }
+      }
     }
 
     // Start listening

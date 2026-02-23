@@ -24,6 +24,10 @@ services:
         value: 7d
       - key: CORS_ORIGIN
         sync: false
+    disk:
+      name: myntra-data
+      mountPath: /data
+      sizeGB: 1
     
 databases:
   - name: myntra-db
