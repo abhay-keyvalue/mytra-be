@@ -28,6 +28,10 @@ export const AppDataSource = new DataSource({
     CreateOrderItemsTable1737545100000,
   ],
   subscribers: [],
+  ssl: config.env === 'production' ? { rejectUnauthorized: false } : false,
+  extra: config.env === 'production' ? {
+    ssl: { rejectUnauthorized: false }
+  } : {},
 });
 
 // Initialize TypeORM connection

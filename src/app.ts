@@ -37,9 +37,17 @@ app.get('/', (req: Request, res: Response) => {
     message: 'Welcome to Myntra OMS Backend API',
     version: '1.0.0',
     endpoints: {
-      health: '/health',
+      health: `${config.api.prefix}/health`,
       api: config.api.prefix,
     },
+  });
+});
+
+// Root health check for Render
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Server is running',
   });
 });
 
@@ -77,7 +85,7 @@ const startServer = async (): Promise<void> => {
     }
 
     // Start listening
-    app.listen(config.server.port, () => {
+    app.listen(config.server.port, config.server.host, () => {
       console.log('=================================');
       console.log(`🚀 Server running on port ${config.server.port}`);
       console.log(`📍 Environment: ${config.env}`);

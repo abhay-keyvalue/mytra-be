@@ -1,0 +1,128 @@
+================================================================================
+                    RENDER ENVIRONMENT VARIABLES
+================================================================================
+Copy these to: Dashboard → Backend Service → Environment Tab
+================================================================================
+
+REQUIRED VARIABLES:
+-------------------
+
+1. NODE_ENV
+   Value: production
+
+2. PORT
+   Value: 3000
+   (Usually auto-set by Render)
+
+3. API_PREFIX
+   Value: /api/v1
+
+4. DATABASE_URL
+   Source: Add from Database
+   Select: myntra-db
+   Property: connectionString
+   (Render auto-fills this - format: postgresql://user:pass@host/db)
+
+5. JWT_SECRET
+   Click: Generate
+   (Render creates a secure random string)
+
+6. JWT_EXPIRES_IN
+   Value: 7d
+
+7. CORS_ORIGIN
+   Value: https://your-frontend.vercel.app
+   ⚠️ REPLACE WITH YOUR ACTUAL VERCEL URL!
+   ⚠️ Must include https://
+   ⚠️ No trailing slash
+
+================================================================================
+
+OPTIONAL VARIABLES:
+-------------------
+
+8. RUN_SEED
+   Value: false
+   (Use API endpoint instead: POST /api/v1/seed)
+
+================================================================================
+
+HOW TO ADD IN RENDER:
+---------------------
+
+1. Dashboard → Select your backend service
+2. Click "Environment" tab at the top
+3. Click "Add Environment Variable" button
+4. For each variable above:
+   - Enter Key name
+   - Enter Value
+   - Click "Add"
+5. Click "Save Changes" (triggers redeploy)
+
+================================================================================
+
+DATABASE_URL - SPECIAL INSTRUCTIONS:
+------------------------------------
+
+DON'T copy-paste the connection string manually!
+
+Instead:
+1. Click "Add Environment Variable"
+2. Key: DATABASE_URL
+3. Click dropdown: "Add from Database"
+4. Select your database: myntra-db
+5. Property: connectionString
+6. Save
+
+This creates a secure internal connection!
+
+================================================================================
+
+CORS_ORIGIN - CRITICAL STEP:
+-----------------------------
+
+Initial value (before frontend deployed):
+   CORS_ORIGIN=http://localhost:5173
+
+After deploying frontend to Vercel:
+   CORS_ORIGIN=https://myntra-fe.vercel.app
+
+To update:
+1. Environment tab
+2. Find CORS_ORIGIN
+3. Click Edit icon
+4. Update value
+5. Save Changes (auto-redeploys)
+
+================================================================================
+
+VERIFY YOUR SETTINGS:
+---------------------
+
+After setting variables, check the logs:
+
+✅ Should see:
+   "✅ TypeORM database connection successful"
+   "🚀 Server running on port 3000"
+
+❌ If errors:
+   - "ENOTFOUND undefined" → DATABASE_URL not set
+   - "Invalid token" → JWT_SECRET not set  
+   - "CORS policy" → CORS_ORIGIN wrong
+
+================================================================================
+
+CURRENT VALUES YOU NEED:
+-------------------------
+
+Based on your deployment:
+
+NODE_ENV=production
+PORT=3000
+API_PREFIX=/api/v1
+DATABASE_URL=[Get from Database: myntra-db]
+JWT_SECRET=[Click Generate]
+JWT_EXPIRES_IN=7d
+CORS_ORIGIN=[Your Vercel URL - update after frontend deploy]
+
+================================================================================
