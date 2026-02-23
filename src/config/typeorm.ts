@@ -1,11 +1,14 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { config } from './env.js';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { User } from '../entities/User.js';
+import { Product } from '../entities/Product.js';
+import { Order } from '../entities/Order.js';
+import { OrderItem } from '../entities/OrderItem.js';
+import { CreateUsersTable1737544800000 } from '../database/migrations/1737544800000-CreateUsersTable.js';
+import { CreateProductsTable1737544900000 } from '../database/migrations/1737544900000-CreateProductsTable.js';
+import { CreateOrdersTable1737545000000 } from '../database/migrations/1737545000000-CreateOrdersTable.js';
+import { CreateOrderItemsTable1737545100000 } from '../database/migrations/1737545100000-CreateOrderItemsTable.js';
 
 // TypeORM DataSource configuration
 export const AppDataSource = new DataSource({
@@ -15,17 +18,14 @@ export const AppDataSource = new DataSource({
   username: config.db.user,
   password: config.db.password,
   database: config.db.name,
-  synchronize: config.env === 'development',
+  synchronize: false,
   logging: config.env === 'development',
-  entities: [
-    config.env === 'production'
-      ? join(__dirname, '..', 'entities', '**', '*.js')
-      : join(__dirname, '..', 'entities', '**', '*.ts')
-  ],
+  entities: [User, Product, Order, OrderItem],
   migrations: [
-    config.env === 'production'
-      ? join(__dirname, '..', 'database', 'migrations', '**', '*.js')
-      : join(__dirname, '..', 'database', 'migrations', '**', '*.ts')
+    CreateUsersTable1737544800000,
+    CreateProductsTable1737544900000,
+    CreateOrdersTable1737545000000,
+    CreateOrderItemsTable1737545100000,
   ],
   subscribers: [],
 });
